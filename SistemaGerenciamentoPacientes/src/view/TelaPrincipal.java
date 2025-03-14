@@ -78,7 +78,7 @@ public class TelaPrincipal extends JFrame {
 
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(() -> {
-			PacienteDAO pacienteDAO = new PacienteDAOImpl();
+			PacienteDAO pacienteDAO = new PacienteDAOImpl(); 
 			new TelaPrincipal(pacienteDAO).setVisible(true);
 		});
 	}
