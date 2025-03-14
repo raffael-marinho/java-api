@@ -20,14 +20,38 @@ public class PacienteDAOImpl implements PacienteDAO {
 	@Override
 	public void cadastrar(Paciente paciente) {
 		String sql = "INSERT INTO PACIENTES (cpf, nome) VALUES (?, ?)";
-		try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-			stmt.setString(1, paciente.getCpf());
+		try (PreparedStatement stmt = connection.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+			String cpf = paciente.getCpf();
+			if (cpfJaCadastrado(cpf)) {
+				System.out.println("CPF já cadastrado: " + cpf);
+				return;
+			}
+
+			stmt.setString(1, cpf);
 			stmt.setString(2, paciente.getNome());
 			stmt.executeUpdate();
-			System.out.println("Paciente cadastrado com sucesso!");
+
+			ResultSet rs = stmt.getGeneratedKeys();
+			if (rs.next()) {
+				paciente.setId(rs.getLong(1));
+			}
+
+			System.out.println("Paciente cadastrado com sucesso! ID: " + paciente.getId());
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean cpfJaCadastrado(String cpf) throws SQLException {
+		String sql = "SELECT COUNT(*) FROM PACIENTES WHERE cpf = ?";
+		try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+			stmt.setString(1, cpf);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.next()) {
+				return rs.getInt(1) > 0;
+			}
+		}
+		return false;
 	}
 
 	@Override
